@@ -30,6 +30,7 @@
 #include "lockTracer.h"
 #include "log.h"
 #include "vmStructs.h"
+#include "safeAccess.h"
 
 
 // JVM TI agent return codes

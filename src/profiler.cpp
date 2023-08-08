@@ -34,7 +34,6 @@
 #include "instrument.h"
 #include "itimer.h"
 #include "dwarf.h"
-#include "flameGraph.h"
 #include "flightRecorder.h"
 #include "fdtransferClient.h"
 #include "frameName.h"
@@ -1308,7 +1307,7 @@ void Profiler::switchThreadEvents(jvmtiEventMode mode) {
 
 /*
  * Dump stacks in FlameGraph input format:
- * 
+ *
  * <frame>;<frame>;...;<topmost frame> <count>
  */
 void Profiler::dumpCollapsed(std::ostream& out, Arguments& args) {
@@ -1339,59 +1338,59 @@ void Profiler::dumpCollapsed(std::ostream& out, Arguments& args) {
 }
 
 void Profiler::dumpFlameGraph(std::ostream& out, Arguments& args, bool tree) {
-    char title[64];
-    if (args._title == NULL) {
-        Engine* active_engine = activeEngine();
-        if (args._counter == COUNTER_SAMPLES) {
-            strcpy(title, active_engine->title());
-        } else {
-            sprintf(title, "%s (%s)", active_engine->title(), active_engine->units());
-        }
-    }
+    // char title[64];
+    // if (args._title == NULL) {
+    //     Engine* active_engine = activeEngine();
+    //     if (args._counter == COUNTER_SAMPLES) {
+    //         strcpy(title, active_engine->title());
+    //     } else {
+    //         sprintf(title, "%s (%s)", active_engine->title(), active_engine->units());
+    //     }
+    // }
 
-    FlameGraph flamegraph(args._title == NULL ? title : args._title, args._counter, args._minwidth, args._reverse);
-    FrameName fn(args, args._style & ~STYLE_ANNOTATE, _epoch, _thread_names_lock, _thread_names);
+    // FlameGraph flamegraph(args._title == NULL ? title : args._title, args._counter, args._minwidth, args._reverse);
+    // FrameName fn(args, args._style & ~STYLE_ANNOTATE, _epoch, _thread_names_lock, _thread_names);
 
-    std::vector<CallTraceSample*> samples;
-    _call_trace_storage.collectSamples(samples);
+    // std::vector<CallTraceSample*> samples;
+    // _call_trace_storage.collectSamples(samples);
 
-    for (std::vector<CallTraceSample*>::const_iterator it = samples.begin(); it != samples.end(); ++it) {
-        CallTrace* trace = (*it)->acquireTrace();
-        if (trace == NULL || excludeTrace(&fn, trace)) continue;
+    // for (std::vector<CallTraceSample*>::const_iterator it = samples.begin(); it != samples.end(); ++it) {
+    //     CallTrace* trace = (*it)->acquireTrace();
+    //     if (trace == NULL || excludeTrace(&fn, trace)) continue;
 
-        u64 counter = args._counter == COUNTER_SAMPLES ? (*it)->samples : (*it)->counter;
-        if (counter == 0) continue;
+    //     u64 counter = args._counter == COUNTER_SAMPLES ? (*it)->samples : (*it)->counter;
+    //     if (counter == 0) continue;
 
-        int num_frames = trace->num_frames;
+    //     int num_frames = trace->num_frames;
 
-        Trie* f = flamegraph.root();
-        if (args._reverse) {
-            // Thread frames always come first
-            if (_add_sched_frame) {
-                const char* frame_name = fn.name(trace->frames[--num_frames]);
-                f = f->addChild(frame_name, counter);
-            }
-            if (_add_thread_frame) {
-                const char* frame_name = fn.name(trace->frames[--num_frames]);
-                f = f->addChild(frame_name, counter);
-            }
+    //     Trie* f = flamegraph.root();
+    //     if (args._reverse) {
+    //         // Thread frames always come first
+    //         if (_add_sched_frame) {
+    //             const char* frame_name = fn.name(trace->frames[--num_frames]);
+    //             f = f->addChild(frame_name, counter);
+    //         }
+    //         if (_add_thread_frame) {
+    //             const char* frame_name = fn.name(trace->frames[--num_frames]);
+    //             f = f->addChild(frame_name, counter);
+    //         }
 
-            for (int j = 0; j < num_frames; j++) {
-                const char* frame_name = fn.name(trace->frames[j]);
-                f = f->addChild(frame_name, counter);
-                f->addCompilationDetails(trace->frames[j].bci, counter);
-            }
-        } else {
-            for (int j = num_frames - 1; j >= 0; j--) {
-                const char* frame_name = fn.name(trace->frames[j]);
-                f = f->addChild(frame_name, counter);
-                f->addCompilationDetails(trace->frames[j].bci, counter);
-            }
-        }
-        f->addLeaf(counter);
-    }
+    //         for (int j = 0; j < num_frames; j++) {
+    //             const char* frame_name = fn.name(trace->frames[j]);
+    //             f = f->addChild(frame_name, counter);
+    //             f->addCompilationDetails(trace->frames[j].bci, counter);
+    //         }
+    //     } else {
+    //         for (int j = num_frames - 1; j >= 0; j--) {
+    //             const char* frame_name = fn.name(trace->frames[j]);
+    //             f = f->addChild(frame_name, counter);
+    //             f->addCompilationDetails(trace->frames[j].bci, counter);
+    //         }
+    //     }
+    //     f->addLeaf(counter);
+    // }
 
-    flamegraph.dump(out, tree);
+    // flamegraph.dump(out, tree);
 }
 
 void Profiler::dumpText(std::ostream& out, Arguments& args) {
